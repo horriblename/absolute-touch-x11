@@ -7,3 +7,8 @@ the code is largely based on [evtest](https://github.com/freedesktop-unofficial-
 
 # Dependencies
 - requires `libxdo`, install `xdotool` from your distribution's repositories
+
+# Compiling
+```
+gcc -lxdo -o absolute-touch absolute-touch-x11.c
+```
