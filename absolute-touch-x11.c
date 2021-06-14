@@ -14,8 +14,12 @@
 #define ROLL_OFFSET		50	// offset relative to display width, 1920
 #define DEV_INPUT_EVENT "/dev/input"
 #define EVENT_DEV_NAME "event"
+
+/* Display number to use in xdo_ functions*/
 #define DISPLAY_NUM 0
+/* Disable to control the area on the screen where the cursor is moved around (using geometry_x,y,w,h)*/
 #define MAP_TO_ENTIRE_SCREEN 1
+/* if disabled, the device file will not be grabbed for exclusive access, and will not handle movement events*/
 #define HANDLE_MOVEMENTS 1
 
 #define AX_X 0
@@ -132,7 +136,10 @@ int scan_devices(char ** device_file_path)
 	return 0;
 }
 
-
+/**
+ * Open device, grabs it for exclusive access if HANDLE_MOVEMENTS is set to 1, 
+ * then record some data required later
+ */
 int init_dev_event_reader(){
    char name[256] = "???";
 	if ((getuid ()) != 0) {
@@ -194,10 +201,13 @@ void record_absdata(int fd, struct touchpad_device_absdata * device_absdata)
    fprintf(stderr, "min y = %d\n", device_absdata -> min_value_abs_y);
    fprintf(stderr, "max y = %d\n", device_absdata -> max_value_abs_y);
 }
-// +----------------------------------------------------------------+
-// | Translate x or y coordinates on touchpad to coordinates on		|
-// | display														|
-// +----------------------------------------------------------------+
+
+/**
+ * Translate x or y coordinates on touchpad to coordinates on display														|
+ *
+ * @param point x or y coordinate from ev.value
+ * @param type 0 for x, 1 for y
+ */
 int translate_pt(
 	int point,	// x/y coordinate from ev.value
 	bool type		// 0 for x, 1 for y
@@ -219,9 +229,13 @@ int translate_pt(
 	point = point - touchpad_min;
 	return display_offset + (int) floor(point*display_size/touchpad_size);
 }
-// +----------------------------------------------------------------+
-// | change geometry_x,y,w,h values									|
-// +----------------------------------------------------------------+
+
+/**
+ * Change geometry_x,y values
+ *
+ * @param rel_x distance to move geometry in the x axis direction
+ * @param rel_y distance to move geometry in the y axis direction
+ */
 int move_geometry(int rel_x, int rel_y){
 
 	geometry_x += rel_x;
@@ -234,9 +248,13 @@ int move_geometry(int rel_x, int rel_y){
 	printf("geometry changed to: %d, %d \n", geometry_x, geometry_y);
 	return 0;
 }
-// +----------------------------------------------------------------+
-// | function to move cursor										|
-// +----------------------------------------------------------------+
+
+/**
+ * Move mouse using xdo library
+ * 
+ * @param x position of finger on touchpad
+ * @param y position of finger on touchpad
+ */
 int mousemove(int x, int y){
    return xdo_move_mouse(
       xdo_tool, 
@@ -246,6 +264,11 @@ int mousemove(int x, int y){
       );
 }
 
+/**
+ * Hold down/ Release mouse button
+ *
+ * @param down hold down mouse button if true, otherwise release it
+ */
 int mousebtn(bool down){
    if (down)
       return xdo_mouse_down(xdo_tool, CURRENTWINDOW, 1);
@@ -253,16 +276,15 @@ int mousebtn(bool down){
       return xdo_mouse_up(xdo_tool, CURRENTWINDOW, 1);
 }
 
-
+/**
+ * function to easily move geometry_x to the left/right
+ */
 void roll(bool go_right){
 	int rel_x = (go_right? 1:-1) * (geometry_w - ROLL_OFFSET);
 	move_geometry(rel_x, 0);
 	return;
 }
-// +----------------------------------------------------------------+
-// | Translate x or y coordinates on touchpad to coordinates on		|
-// | display														|
-// +----------------------------------------------------------------+
+
 int event_listener_loop(){
 	const size_t ev_size = sizeof(struct input_event);
 	ssize_t size;
