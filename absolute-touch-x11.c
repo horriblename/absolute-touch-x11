@@ -15,7 +15,7 @@
 #define DEV_INPUT_EVENT "/dev/input"
 #define EVENT_DEV_NAME "event"
 
-/* Display number to use in xdo_ functions*/
+/* Display number to use in xdo functions*/
 #define DISPLAY_NUM 0
 /* Disable to control the area on the screen where the cursor is moved around (using geometry_x,y,w,h)*/
 #define MAP_TO_ENTIRE_SCREEN 1
@@ -67,7 +67,6 @@ int SCREEN_HEIGHT	= 1080;
 
 xdo_t * xdo_tool;
 
-void record_absdata(int fd, struct touchpad_device_absdata * device_absdata);
 volatile sig_atomic_t stop = 0;
 
 void interrupt_handler(int sig)
@@ -137,39 +136,6 @@ int scan_devices(char ** device_file_path)
 }
 
 /**
- * Open device, grabs it for exclusive access if HANDLE_MOVEMENTS is set to 1, 
- * then record some data required later
- */
-int init_dev_event_reader(){
-   char name[256] = "???";
-	if ((getuid ()) != 0) {
-        fprintf(stderr, "You are not root! This may not work...\n");
-        return 1;
-    }
-
-    /* Open Device */
-    fd = open(device_file_path, O_RDONLY);
-    if (fd == -1) {
-        fprintf(stderr, "%s is not a vaild device\n", device_file_path);
-        return 1;
-    }
-
-    /* Print Device Name */
-    ioctl(fd, EVIOCGNAME(sizeof(name)), name);
-    printf("Reading from:\n");
-    printf("device file = %s\n", device_file_path);
-    printf("device name = %s\n", name);
-
-   if(HANDLE_MOVEMENTS)
-	   ioctl(fd, EVIOCGRAB, (void*)1);
-
-   record_absdata(fd, &device_absdata);
-
-   return 0;
-}
-
-
-/**
  * Record additional information for absolute axes (min/max value).
  *
  * @param fd The file descriptor to the device.
@@ -200,6 +166,38 @@ void record_absdata(int fd, struct touchpad_device_absdata * device_absdata)
    fprintf(stderr, "max x = %d\n", device_absdata -> max_value_abs_x);
    fprintf(stderr, "min y = %d\n", device_absdata -> min_value_abs_y);
    fprintf(stderr, "max y = %d\n", device_absdata -> max_value_abs_y);
+}
+
+/**
+ * Open device, grabs it for exclusive access if HANDLE_MOVEMENTS is set to 1, 
+ * then record some data required later
+ */
+int init_dev_event_reader(){
+   char name[256] = "???";
+	if ((getuid ()) != 0) {
+        fprintf(stderr, "You are not root! This may not work...\n");
+        return 1;
+    }
+
+    /* Open Device */
+    fd = open(device_file_path, O_RDONLY);
+    if (fd == -1) {
+        fprintf(stderr, "%s is not a vaild device\n", device_file_path);
+        return 1;
+    }
+
+    /* Print Device Name */
+    ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+    printf("Reading from:\n");
+    printf("device file = %s\n", device_file_path);
+    printf("device name = %s\n", name);
+
+   if(HANDLE_MOVEMENTS)
+	   ioctl(fd, EVIOCGRAB, (void*)1);
+
+   record_absdata(fd, &device_absdata);
+
+   return 0;
 }
 
 /**

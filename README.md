@@ -9,9 +9,7 @@ the code is largely based on [evtest](https://github.com/freedesktop-unofficial-
 - requires `libxdo`, install `xdotool` from your distribution's repositories
 
 # Compiling
-```
-gcc -lxdo -o absolute-touch absolute-touch-x11.c
-```
+Use the `make` commmand to compile the program. This results in the at-x11 executable
 
 # Usage
 Syntax:
