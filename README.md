@@ -12,3 +12,13 @@ the code is largely based on [evtest](https://github.com/freedesktop-unofficial-
 ```
 gcc -lxdo -o absolute-touch absolute-touch-x11.c
 ```
+
+# Usage
+Syntax:
+```
+sudo ./at-x11 [event file number]
+```
+If no arguements are given the program will list all `/dev/input/event*` files and their associated device names, and use any device with a name containing the string "TouchPad", otherwise the user will be prompted to input the event number to use.
+
+**Note:**
+sudo privileges is needed to read from `/dev/input/event*` files
