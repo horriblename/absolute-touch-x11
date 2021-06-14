@@ -10,14 +10,6 @@
 #include <linux/input.h>
 #include <xdo.h>
 
-#define EVENT_TYPE		EV_ABS
-#define EVENT_KEY		EV_KEY
-#define EVENT_CODE_X	ABS_X
-#define EVENT_CODE_Y	ABS_Y
-#define EVENT_CODE_ID	ABS_MT_TRACKING_ID
-#define EVENT_CODE_2BTN	BTN_TOOL_DOUBLETAP
-#define EVENT_KEY_BTN_L	BTN_LEFT
-#define EVENT_KEY_BTN_R	BTN_RIGHT
 // ---
 #define ROLL_OFFSET		50	// offset relative to display width, 1920
 #define DEV_INPUT_EVENT "/dev/input"
@@ -294,20 +286,20 @@ int event_listener_loop(){
       for (i = 0; i < size / ev_size; i++){
          switch(ev.type)
          {
-            case EVENT_TYPE:
+            case EV_ABS:
                switch(touch_down)
                {
                   case TOUCH_DOWN_NONE:
-                     if (ev.code == EVENT_CODE_ID && ev.value != -1) {
+                     if (ev.code == ABS_MT_TRACKING_ID && ev.value != -1) {
                         touch_down = TOUCH_DOWN_NEW;
                      }
                      break;
 
                   case TOUCH_DOWN_NEW:
-                     if (ev.code == EVENT_CODE_X)
+                     if (ev.code == ABS_X)
                         initial_x = touch_x = ev.value;
 
-                     else if (ev.code == EVENT_CODE_Y)
+                     else if (ev.code == ABS_Y)
                         initial_y = touch_y = ev.value;
 
                      if (touch_x != -1 && touch_y != -1){
@@ -319,15 +311,15 @@ int event_listener_loop(){
                      break;
 
                   case TOUCH_DOWN_CONT:
-                     if (ev.code == EVENT_CODE_ID && ev.value == -1){
+                     if (ev.code == ABS_MT_TRACKING_ID && ev.value == -1){
                         mousebtn(0);
                         touch_x = touch_y = -1;
                         touch_down = TOUCH_DOWN_NONE;
                      }
 
-                     else if (ev.code == EVENT_CODE_X)
+                     else if (ev.code == ABS_X)
                         touch_x = ev.value;
-                     else if (ev.code ==EVENT_CODE_Y)
+                     else if (ev.code ==ABS_Y)
                         touch_y = ev.value;
 
                      if (HANDLE_MOVEMENTS && touch_x != -1 && touch_y != -1){
@@ -338,9 +330,9 @@ int event_listener_loop(){
                      break;
 
                   case TOUCH_DOWN_MULTI:
-                     if (ev.code == EVENT_CODE_X)
+                     if (ev.code == ABS_X)
                         touch_x = ev.value;
-                     else if (ev.code == EVENT_CODE_Y)
+                     else if (ev.code == ABS_Y)
                         touch_y = ev.value;
 
                      if (touch_x != -1 && touch_y != -1){
@@ -355,7 +347,7 @@ int event_listener_loop(){
                         initial_x = touch_x; initial_y = touch_y;
                         touch_x = touch_y = -1;
                      }
-                     if (ev.code == EVENT_CODE_ID && ev.value == -1){
+                     if (ev.code == ABS_MT_TRACKING_ID && ev.value == -1){
                         touch_down = TOUCH_DOWN_NONE;
                         }
                      break;
@@ -363,18 +355,18 @@ int event_listener_loop(){
                }
                break;
 
-            case EVENT_KEY:
-               if (ev.code == EVENT_CODE_2BTN && ev.value == 1)
+            case EV_KEY:
+               if (ev.code == BTN_TOOL_DOUBLETAP && ev.value == 1)
                {
                   mousebtn(0);
                   touch_down = TOUCH_DOWN_MULTI;
                }
 
-               if (ev.code == EVENT_KEY_BTN_L && ev.value==1){
+               if (ev.code == BTN_LEFT && ev.value==1){
                   printf("cpa");
                   roll(0);
                }
-               if (ev.code == EVENT_KEY_BTN_R && ev.value==1){
+               if (ev.code == BTN_RIGHT && ev.value==1){
                   printf("cpa");
                   roll(1);
                }
