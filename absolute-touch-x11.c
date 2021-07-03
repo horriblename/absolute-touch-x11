@@ -121,6 +121,7 @@ int scan_devices(char ** device_file_path)
       if (strstr(name, "TouchPad") != NULL){
          *device_file_path = (char *) malloc(64);
          strcpy(*device_file_path, fname);
+		   free(namelist);
          return 0;
       }
 	}
@@ -169,7 +170,7 @@ void record_absdata(int fd, struct touchpad_device_absdata * device_absdata)
 }
 
 /**
- * Open device, grabs it for exclusive access if HANDLE_MOVEMENTS is set to 1, 
+ * Open device, grabs it for exclusive access if HANDLE_MOVEMENTS is set to 1,
  * then record some data required later
  */
 int init_dev_event_reader(){
@@ -249,15 +250,15 @@ int move_geometry(int rel_x, int rel_y){
 
 /**
  * Move mouse using xdo library
- * 
+ *
  * @param x position of finger on touchpad
  * @param y position of finger on touchpad
  */
 int mousemove(int x, int y){
    return xdo_move_mouse(
-      xdo_tool, 
-      translate_pt(x, 0), 
-      translate_pt(y, 1), 
+      xdo_tool,
+      translate_pt(x, 0),
+      translate_pt(y, 1),
       DISPLAY_NUM
       );
 }
