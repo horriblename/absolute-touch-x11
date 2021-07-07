@@ -15,15 +15,15 @@
 #define DEV_INPUT_EVENT "/dev/input"
 #define EVENT_DEV_NAME "event"
 
+#define AX_X 0
+#define AX_Y 1
+
 /* Display number to use in xdo functions*/
 #define DISPLAY_NUM 0
 /* Disable to control the area on the screen where the cursor is moved around (using geometry_x,y,w,h)*/
 #define MAP_TO_ENTIRE_SCREEN 1
 /* if disabled, the device file will not be grabbed for exclusive access, and will not handle movement events*/
 #define HANDLE_MOVEMENTS 1
-
-#define AX_X 0
-#define AX_Y 1
 
 enum touch_status{
    TOUCH_DOWN_NONE,     // no contact
