@@ -48,7 +48,6 @@ struct touchpad_device_absdata{
    int max_value_abs_y;
 } device_absdata;
 
-struct input_event ev;
 int fd;
 char * device_file_path;
 // --- touch variables
@@ -285,6 +284,7 @@ void roll(bool go_right){
 }
 
 int event_listener_loop(){
+   struct input_event ev[64];
 	const size_t ev_size = sizeof(struct input_event);
 	ssize_t size;
    int i;
@@ -297,7 +297,7 @@ int event_listener_loop(){
       select(fd + 1, &rdfs, NULL, NULL, NULL);
       if (stop)
          break;
-      size = read(fd, &ev, ev_size);
+      size = read(fd, ev, ev_size);
 
       if (size < ev_size) {
         fprintf(stderr, "Error size when reading\n");
@@ -305,23 +305,23 @@ int event_listener_loop(){
       }
 
       for (i = 0; i < size / ev_size; i++){
-         switch(ev.type)
+         switch(ev[i].type)
          {
             case EV_ABS:
                switch(touch_down)
                {
                   case TOUCH_DOWN_NONE:
-                     if (ev.code == ABS_MT_TRACKING_ID && ev.value != -1) {
+                     if (ev[i].code == ABS_MT_TRACKING_ID && ev[i].value != -1) {
                         touch_down = TOUCH_DOWN_NEW;
                      }
                      break;
 
                   case TOUCH_DOWN_NEW:
-                     if (ev.code == ABS_X)
-                        initial_x = touch_x = ev.value;
+                     if (ev[i].code == ABS_X)
+                        initial_x = touch_x = ev[i].value;
 
-                     else if (ev.code == ABS_Y)
-                        initial_y = touch_y = ev.value;
+                     else if (ev[i].code == ABS_Y)
+                        initial_y = touch_y = ev[i].value;
 
                      if (touch_x != -1 && touch_y != -1){
                         mousemove(touch_x, touch_y);
@@ -332,16 +332,16 @@ int event_listener_loop(){
                      break;
 
                   case TOUCH_DOWN_CONT:
-                     if (ev.code == ABS_MT_TRACKING_ID && ev.value == -1){
+                     if (ev[i].code == ABS_MT_TRACKING_ID && ev[i].value == -1){
                         mousebtn(0);
                         touch_x = touch_y = -1;
                         touch_down = TOUCH_DOWN_NONE;
                      }
 
-                     else if (ev.code == ABS_X)
-                        touch_x = ev.value;
-                     else if (ev.code ==ABS_Y)
-                        touch_y = ev.value;
+                     else if (ev[i].code == ABS_X)
+                        touch_x = ev[i].value;
+                     else if (ev[i].code ==ABS_Y)
+                        touch_y = ev[i].value;
 
                      if (HANDLE_MOVEMENTS && touch_x != -1 && touch_y != -1){
                         mousemove(touch_x, touch_y);
@@ -351,10 +351,10 @@ int event_listener_loop(){
                      break;
 
                   case TOUCH_DOWN_MULTI:
-                     if (ev.code == ABS_X)
-                        touch_x = ev.value;
-                     else if (ev.code == ABS_Y)
-                        touch_y = ev.value;
+                     if (ev[i].code == ABS_X)
+                        touch_x = ev[i].value;
+                     else if (ev[i].code == ABS_Y)
+                        touch_y = ev[i].value;
 
                      if (touch_x != -1 && touch_y != -1){
                         int rel_x = touch_x - initial_x;
@@ -368,7 +368,7 @@ int event_listener_loop(){
                         initial_x = touch_x; initial_y = touch_y;
                         touch_x = touch_y = -1;
                      }
-                     if (ev.code == ABS_MT_TRACKING_ID && ev.value == -1){
+                     if (ev[i].code == ABS_MT_TRACKING_ID && ev[i].value == -1){
                         touch_down = TOUCH_DOWN_NONE;
                         }
                      break;
@@ -377,17 +377,17 @@ int event_listener_loop(){
                break;
 
             case EV_KEY:
-               if (ev.code == BTN_TOOL_DOUBLETAP && ev.value == 1)
+               if (ev[i].code == BTN_TOOL_DOUBLETAP && ev[i].value == 1)
                {
                   mousebtn(0);
                   touch_down = TOUCH_DOWN_MULTI;
                }
 
-               if (ev.code == BTN_LEFT && ev.value==1){
+               if (ev[i].code == BTN_LEFT && ev[i].value==1){
                   printf("cpa");
                   roll(0);
                }
-               if (ev.code == BTN_RIGHT && ev.value==1){
+               if (ev[i].code == BTN_RIGHT && ev[i].value==1){
                   printf("cpa");
                   roll(1);
                }
